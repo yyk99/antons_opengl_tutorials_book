@@ -40,6 +40,7 @@ file (GLOB AUXFILES
 	*.obj
 	*.dae
 	*.png
+	*.jpg
 	)
 foreach (t ${AUXFILES})
 	get_filename_component(n ${t} NAME)
