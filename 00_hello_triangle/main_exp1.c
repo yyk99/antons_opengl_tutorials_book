@@ -17,6 +17,58 @@
 #include <GLFW/glfw3.h> /* GLFW helper library */
 #include <stdio.h>
 
+#include <string.h>
+#include <stdlib.h>
+
+#include <assert.h>
+
+/*
+Load the shader strings from text files called test.vertand test.frag(a naming convention is handy). 
+
+Change the colour of the triangle in the fragment shader. 
+
+Try to move the shape in the vertex
+shader e.g. vec4 (vp.x, vp.y + 1.0, vp.z, 1.0); 
+
+Try to add another triangle to the list of points and make a square shape. You will have to change several 
+variables when setting up the buffer and drawing the shape. Which variables do you need to keep track of 
+for each triangle? (hint: not much...). 
+
+Try drawing with GL_LINE_STRIP or GL_LINESor GL_POINTSinstead of triangles. Does it put the lines
+where you expect? How big are the points by default? 
+
+Try changing the background colour by using glClearColor ()before the rendering loop. Something grey-ish is usually fairly neutral; 0.6f, 0.6f,
+0.8f, 1.0f. 
+
+Try creating a second VAO, and drawing 2 shapes (remember to bind the second VAO before drawing again). 
+
+Try creating a second shader programme, and draw the second shape a different colour
+(remember to "use" the second shader programme before drawing again).
+
+Gerdelan, Anton. Anton's OpenGL 4 Tutorials . Kindle Edition. */
+
+char* read_from_file( const char* filename ) {
+
+  FILE* text_file = fopen( filename, "rb" );
+  if ( text_file == NULL) {
+    fprintf( stderr, "Cannot open input file: %s. %s\n", filename, strerror( errno ) );
+    exit( 2 );
+  }
+
+  fseek( text_file, 0, SEEK_END );
+  long size = ftell( text_file );
+
+  char* buffer = malloc(size + 1);
+  assert( buffer );
+  fseek( text_file, 0, SEEK_SET );
+  size_t n = fread( buffer, 1, size, text_file );
+  assert( n == size );
+  buffer[size] = 0;
+
+  fclose( text_file );
+  return buffer;
+}
+
 int main() {
   GLFWwindow* window = NULL;
   const GLubyte* renderer;
@@ -25,30 +77,30 @@ int main() {
   GLuint vbo;
 
   /* geometry to use. these are 3 xyz points (9 floats total) to make a triangle */
-  GLfloat points[] = { 
-      0.0f, 0.5f, 0.0f, 
-      0.5f, -0.5f, 0.0f,
-      -0.5f, -0.5f, 0.0f,
-  };
+  GLfloat points[] = { 0.0f, 0.5f, 0.0f, 0.5f, -0.5f, 0.0f, -0.5f, -0.5f, 0.0f };
+
+  /* Load the shader strings from text files called test.vertand test.frag( a naming convention is handy ).*/
 
   /* these are the strings of code for the shaders
   the vertex shader positions each vertex point */
-  const char* vertex_shader =
+  const char* vertex_shader = read_from_file( "vertex.shader" );
+#if 0
     "#version 410\n"
     "in vec3 vp;"
     "void main () {"
     "  gl_Position = vec4(vp, 1.0);"
     "}";
-
+#endif
   /* the fragment shader colours each fragment (pixel-sized area of the
   triangle) */
-  const char* fragment_shader =
+  const char* fragment_shader = read_from_file( "fragment.shader" );
+#if 0
     "#version 410\n"
     "out vec4 frag_colour;"
     "void main () {"
     "  frag_colour = vec4(0.5, 0.0, 0.0, 1.0);"
     "}";
-
+#endif
   /* GL shader objects for vertex and fragment shader [components] */
   GLuint vert_shader, frag_shader;
   /* GL shader programme object [combined, to link] */
@@ -66,7 +118,7 @@ int main() {
   glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
   glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
 
-  window = glfwCreateWindow( 640, 480, "Hello Triangle", NULL, NULL );
+  window = glfwCreateWindow( 640, 480, "Hello Triangle (Experiments)", NULL, NULL );
   if ( !window ) {
     fprintf( stderr, "ERROR: could not open window with GLFW3\n" );
     glfwTerminate();

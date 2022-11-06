@@ -1,9 +1,6 @@
-cmake_minimum_required(VERSION 3.6)   # CMake version check
-project(antons_tutorials C CXX)               # Create project "simple_example"
-set(CMAKE_CXX_STANDARD 11)            # Enable c++11 standard
-
-#add source folder so the program can be compiled at build folder
-include_directories(${CMAKE_SOURCE_DIR})
+#
+#
+#
 
 #Headers
 file(GLOB HEADERS
@@ -12,27 +9,16 @@ file(GLOB HEADERS
 
 #Main
 set(SOURCE_FILES main.c)
-add_executable(hellot ${SOURCE_FILES} ${HEADERS})
+get_filename_component(TARGET ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+add_gl_executable(${TARGET} ${SOURCE_FILES};${HEADERS})
 
-#OpenGL
-find_package(OpenGL REQUIRED)
-include_directories(${OPENGL_INCLUDE_DIR})
+# Load the shader strings from text files called test.vertand test.frag(a naming convention is handy).
+# Gerdelan, Anton. Anton's OpenGL 4 Tutorials . Kindle Edition.
+list (APPEND SOURCE_FILES_EXP1 main_exp1.c fragment.shader.cmake vertex.shader.cmake ${HEADERS})
+add_gl_executable(${TARGET}_exp1 "${SOURCE_FILES_EXP1}")
 
-target_link_libraries(hellot ${OPENGL_gl_LIBRARY})
+configure_file(fragment.shader.cmake fragment.shader)
+configure_file(vertex.shader.cmake vertex.shader)
 
-
-#GLFW
-find_package(PkgConfig REQUIRED)
-pkg_search_module(GLFW REQUIRED glfw3)
-include_directories(${GLFW_INCLUDE_DIRS})
-target_link_libraries(hellot ${GLFW_LIBRARIES})
-
-#GLEW
-find_package(GLEW REQUIRED)
-if (GLEW_FOUND)
-    include_directories(${GLEW_INCLUDE_DIRS})
-    target_link_libraries(hellot ${GLEW_LIBRARIES})
-endif()
-
-
-
+list (APPEND SOURCE_FILES_EXP2 main_exp2.c ${HEADERS})
+add_gl_executable(${TARGET}_exp2 "${SOURCE_FILES_EXP2}")
